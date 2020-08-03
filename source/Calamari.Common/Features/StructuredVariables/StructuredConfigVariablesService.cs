@@ -38,7 +38,7 @@ namespace Calamari.Common.Features.StructuredVariables
         public void ReplaceVariables(RunningDeployment deployment)
         {
             var targets = deployment.Variables.GetPaths(ActionVariables.StructuredConfigurationVariablesTargets);
-            var supportNonJsonReplacement = deployment.Variables.GetFlag(ActionVariables.StructuredConfigurationFeatureFlag);
+            var onlyPerformJsonReplacement = deployment.Variables.GetFlag(ActionVariables.StructuredConfigurationFallbackFlag);	
             
             foreach (var target in targets)
             {
@@ -59,7 +59,7 @@ namespace Calamari.Common.Features.StructuredVariables
                 foreach (var filePath in matchingFiles)
                 {
                     // TODO: once we allow users to specify a file format, pass it through here.
-                    var replacersToTry = GetReplacersToTryForFile(filePath, null, supportNonJsonReplacement);
+                    var replacersToTry = GetReplacersToTryForFile(filePath, null, onlyPerformJsonReplacement);
                     DoReplacement(filePath, deployment.Variables, replacersToTry);
                 }
             }
@@ -78,18 +78,16 @@ namespace Calamari.Common.Features.StructuredVariables
             return files;
         }
 
-        IFileFormatVariableReplacer[] GetReplacersToTryForFile(string filePath, string? specifiedFileFormat, bool supportNonJsonReplacement)
+        IFileFormatVariableReplacer[] GetReplacersToTryForFile(string filePath, string? specifiedFileFormat, bool onlyPerformJsonReplacement)
         {
-            if (!supportNonJsonReplacement)
-            {
-                return new []
-                {
-                    jsonReplacer
-                };
+            if (onlyPerformJsonReplacement)	
+            {	
+                return new []	
+                {	
+                    jsonReplacer	
+                };	
             }
-
-            log.Info($"Feature toggle flag {ActionVariables.StructuredConfigurationFeatureFlag} detected. Considering replacers for all supported file formats.");
-
+            
             if (!string.IsNullOrWhiteSpace(specifiedFileFormat))
             {
                 var specifiedReplacer = TryFindReplacerForFormat(specifiedFileFormat);

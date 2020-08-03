@@ -33,7 +33,7 @@ var timestampUrls = new string[]
 {
     "http://timestamp.globalsign.com/scripts/timestamp.dll",
     "http://www.startssl.com/timestamp",
-    "http://timestamp.comodoca.com/rfc3161", 
+    "http://timestamp.comodoca.com/rfc3161",
     "http://timestamp.verisign.com/scripts/timstamp.dll",
     "http://tsa.starfieldtech.com"
 };
@@ -47,7 +47,7 @@ Setup(context =>
         OutputType = GitVersionOutput.Json,
 		LogFilePath = "gitversion.log"
     });
-    
+
 
     nugetVersion = gitVersionInfo.NuGetVersion;
 
@@ -154,7 +154,7 @@ Task("Pack")
     {
         DoPackage("Calamari", "netcoreapp3.1", nugetVersion, rid);
     }
-	
+
 	// Create a Zip for each runtime for testing
 	foreach(var rid in GetProjectRuntimeIds(@".\source\Calamari.Tests\Calamari.Tests.csproj"))
     {
@@ -177,6 +177,7 @@ Task("Pack")
         DotNetCorePack(project.ToString(), dotNetCorePackSettings);
     }
     DotNetCorePack("./source/Calamari.CloudAccounts/Calamari.CloudAccounts.csproj", dotNetCorePackSettings);
+    DotNetCorePack("./source/Calamari.Testing/Calamari.Testing.csproj", dotNetCorePackSettings);
 
 });
 
@@ -192,7 +193,7 @@ Task("CopyToLocalPackages")
 private string DoPublish(string project, string framework, string version, string runtimeId = null) {
 	var projectDir = Path.Combine("./source", project);
 	var publishedTo = Path.Combine(publishDir, project, framework);
-   
+
    var publishSettings = new DotNetCorePublishSettings
     {
         Configuration = configuration,
@@ -200,7 +201,7 @@ private string DoPublish(string project, string framework, string version, strin
         Framework = framework,
 		ArgumentCustomization = args => args.Append($"/p:Version={nugetVersion}").Append($"--verbosity normal")
     };
-	
+
 	 if (!string.IsNullOrEmpty(runtimeId))
     {
         publishSettings.OutputDirectory = Path.Combine(publishedTo, runtimeId);
@@ -257,8 +258,8 @@ private void DoPackage(string project, string framework, string version, string 
 
 private void SignAndTimestampBinaries(string outputDirectory)
 {
-    // When building locally signing isn't really necessary and it could take up to 3-4 minutes to sign all the binaries 
-    // as we build for many, many different runtimes so disabling it locally means quicker turn around when doing local development.    
+    // When building locally signing isn't really necessary and it could take up to 3-4 minutes to sign all the binaries
+    // as we build for many, many different runtimes so disabling it locally means quicker turn around when doing local development.
     if (BuildSystem.IsLocalBuild) return;
 
     Information($"Signing binaries in {outputDirectory}");
@@ -266,7 +267,7 @@ private void SignAndTimestampBinaries(string outputDirectory)
     // check that any unsigned libraries, that Octopus Deploy authors, get signed to play nice with security scanning tools
     // refer: https://octopusdeploy.slack.com/archives/C0K9DNQG5/p1551655877004400
     // decision re: no signing everything: https://octopusdeploy.slack.com/archives/C0K9DNQG5/p1557938890227100
-     var unsignedExecutablesAndLibraries = 
+     var unsignedExecutablesAndLibraries =
          GetFiles(
             outputDirectory + "/Calamari*.exe",
             outputDirectory + "/Calamari*.dll",
@@ -279,7 +280,7 @@ private void SignAndTimestampBinaries(string outputDirectory)
     SignFiles(unsignedExecutablesAndLibraries, signingCertificatePath, signingCertificatePassword);
     TimeStampFiles(unsignedExecutablesAndLibraries);
 }
-// note: Doesn't check if existing signatures are valid, only that one exists 
+// note: Doesn't check if existing signatures are valid, only that one exists
 // source: https://blogs.msdn.microsoft.com/windowsmobile/2006/05/17/programmatically-checking-the-authenticode-signature-on-a-file/
 private bool HasAuthenticodeSignature(FilePath filePath)
 {
@@ -303,7 +304,7 @@ void SignFiles(IEnumerable<FilePath> files, FilePath certificatePath, string cer
 
     if (!FileExists(certificatePath))
         throw new Exception($"The code-signing certificate was not found at {certificatePath}.");
-    
+
     Information($"Signing {files.Count()} files using certificate at '{certificatePath}'...");
 
     var signArguments = new ProcessArgumentBuilder()
