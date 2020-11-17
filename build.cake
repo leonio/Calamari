@@ -49,8 +49,7 @@ Setup(context =>
 		LogFilePath = "gitversion.log"
     });
 
-
-    nugetVersion = gitVersionInfo.NuGetVersion;
+    nugetVersion = isCustomPackageBuild ? gitVersionInfo.MajorMinorPatch : gitVersionInfo.NuGetVersion;
 
     Information("Building Calamari v{0}", nugetVersion);
 });
