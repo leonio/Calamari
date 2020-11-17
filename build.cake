@@ -16,6 +16,7 @@ var configuration = Argument("configuration", "Release");
 var testFilter = Argument("where", "");
 var signingCertificatePath = Argument("signing_certificate_path", "");
 var signingCertificatePassword = Argument("signing_certificate_password", "");
+var isCustomPackageBuild = Argument<bool>("custom_build", false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARIABLES
@@ -222,7 +223,7 @@ private void DoPackage(string project, string framework, string version, string 
 {
     var publishedTo = Path.Combine(publishDir, project, framework);
     var projectDir = Path.Combine("./source", project);
-    var packageId = $"{project}";
+    var packageId = isCustomPackageBuild ? $"{project}.netfx" : $"{project}";
     var nugetPackProperties = new Dictionary<string,string>();
     var publishSettings = new DotNetCorePublishSettings
     {
